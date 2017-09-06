@@ -6,3 +6,11 @@
   max-height: 400px;
   overflow: auto;
 }
+
+.btn {
+    background-color: #33DBFF;
+}
+
+h1, h2, h3 {
+    color: orangered;
+}
