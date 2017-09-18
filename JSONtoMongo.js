@@ -7,58 +7,40 @@ var fs = require('fs'),
     mongoose = require('mongoose'),
     Schema = mongoose.Schema,
     Listing = require('./ListingSchema.js'),
-    config = require('./config'),
-    listings = require('./listings');
+    config = require('./config');
 
 /* Connect to your database */
-mongoose.connect(config.uri);
+mongoose.connect(config.db.uri);
 
 /* 
   Instantiate a mongoose model for each listing object in the JSON file, 
   and then save it to your Mongo database 
  */
 
-Listing.insertMany(listings, function (err, docs) {
-
-    var newListing;
-    if (!(listings.coordinates == null) && !(listings.address == null)) {
-        newListing = new Listing({
-            code: listings.code,
-            name: listings.name,
-            coordinates: {
-                latitude: listings.coordinates.latitude,
-                longitude: listings.coordinates.longitude
-            },
-            address: lisings.address
-        });
-    }
-    else if (listings.coordinates) {
-        newListing = new Listing({
-            code: listings.code,
-            name: listings.name,
-            coordinates: {
-                latitude: listings.coordinates.latitude,
-                longitude: listings.coordinates.longitude
-            }
-        });
-    }
-    else if (listings.address) {
-        newListing = new Listing({
-            code: listings.code,
-            name: listings.name,
-            address: listings.address
-        });
-    }
-    else {
-        newListing = new Listing({
-            code: listings.code,
-            name: listings.name,
-        });
+fs.readFile('listings.json', function (err, data) {
+    if (err) {
+        throw err;
     }
 
-    newListing.save(function (err) {
-        if (err) throw err;
+    //parses the json file
+    var stuff = JSON.parse(data);
+
+    //gets the array of mini objects in the big json object
+    var listingData = stuff.entries;
+
+    //goes through each listing individually
+    listingData.forEach(function (listing) {
+
+        //creates the actual listing (details handled by the schema)
+        var newListing = new Listing(listing);
+
+        //saves the listing
+        newListing.save(function (err) {
+            if (err) throw err;
+            console.log('Listing made!');
+        });
     });
+
 });
 
 /* 
